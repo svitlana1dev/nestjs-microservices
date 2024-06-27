@@ -1,0 +1,42 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo:latest
+    hostname: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+
+  mongo-client:
+    image: mongoclient/mongoclient:latest
+    hostname: mongoclient
+    ports:
+      - 8081:3000
+    volumes:
+      - clientdb:/data/db
+    depends_on:
+      - mongo
+    environment:
+      - MONGOCLIENT_AUTH=true
+      - MONGOCLIENT_USERNAME=admin
+      - MONGOCLIENT_PASSWORD=admin
+      - MONGOCLIENT_DEFAULT_CONNECTION_URL=mongodb://admin:admin@localhost:27017/
+
+  rmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+
+volumes:
+  mongodb:
+    driver: local
+  clientdb:
+    driver: local
